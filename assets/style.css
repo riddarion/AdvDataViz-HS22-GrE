@@ -2,7 +2,7 @@
 
 
 body {
-  background-color: #000000;	/*#f0f4f5; */
+  background-color: #000000;
   color: #ffffff;
   font-family: Barlow;
   margin: 0;
@@ -11,7 +11,7 @@ body {
 
 h1 {
   text-align: center;
-  font-size: 1.2em;
+  font-size: 1.5em;
   color: #000000;
 }
 
@@ -26,10 +26,11 @@ h2 {
   display: flex;
   margin: 0rem;
   background-color: transparent;
+
 }
 
 .header {
-	background-color: #29CD10;
+	background-color: #1DB954;
 	display: flex;
 	margin: 0rem;
 	padding-left: 1rem;
@@ -49,10 +50,7 @@ h2 {
   padding-right: 0.2rem;
   position: relative;
   float: right;
-  border-top: 0.08rem solid #ccc;
-  border-bottom: 0.08rem solid #ccc;
-  border-right: 0.08rem solid #ccc;
-  border-left: 0.08rem solid #ccc;
+
 }
 
 .graphs {
@@ -69,10 +67,9 @@ h2 {
 
 
 .wrapper-list {
-  border-right: 0.1rem solid #e36209;
-  background-color: transparent;
+  background-color: #111111;
   width: 15%;
-  height: 90%;
+  height: 100%;
   padding-right: 1rem;
   padding-left: 1rem;
 
@@ -88,12 +85,9 @@ h2 {
 
 
 #treemap {
-	height: 40vh;
-	width: 80%
-	border-top: 0.08rem solid #ccc;
-	border-bottom: 0.08rem solid #ccc;
-	border-right: 0.08rem solid #ccc;
-	border-left: 0.08rem solid #ccc;
+	height: 68vh;
+	width: 100%
+
 }
 
 
@@ -118,7 +112,7 @@ h2 {
 
 #parallels {
 	height: 25vh;
-	margin-top: 1rem;
+
 }
 
 
@@ -138,6 +132,6 @@ h2 {
 
 
 .Select-control {
-  background-color: #FFFFFF;
+  background-color: #111111;
 
 }
