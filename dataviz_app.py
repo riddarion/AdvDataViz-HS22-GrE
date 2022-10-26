@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import numpy as np
+import statistics
 
 import dash
 import dash_html_components as html
@@ -86,15 +87,14 @@ app.layout = html.Div([
         #rechte Spalte
         html.Div(children = [
 
-            #Erste Zeile mit Parallel Coordinates
+            #Erste Zeile mit Stacked Bar Chart
             html.Div(children = [
-                    dcc.Graph(id='parallel-coordinates', figure = {}, style = {'display': 'inline-block'}, responsive=True,
+                    dcc.Graph(id='stacked-bar', figure = {}, style = {'display': 'inline-block'}, responsive=True,
                               config={'displayModeBar': False}),
             ], className="parallel-coordinates-row"),
 
             #Zweite Zeile, Inhalt folgt später
             html.Div(children = [
-                html.P("Weitere Visualisierungen folgen")
             ], className="rest"),
         ], className="graph-container"),
     ], className="container")
@@ -106,7 +106,7 @@ app.layout = html.Div([
 #Callback
 @app.callback(
     [Output(component_id='treemap', component_property='figure'),
-     Output(component_id='parallel-coordinates', component_property='figure'),
+     Output(component_id='stacked-bar', component_property='figure'),
      ],
     [Input(component_id='mood', component_property='value') #,
      #Input(component_id='datepicker', component_property='start_date'),
@@ -135,18 +135,80 @@ def update_moods(mood_slctd):  #, date_slctd1, date_slctd2
         values = [140, 197, 154, 195],
         parents = ["Mood", "Mood", "Mood", "Mood"],
         marker_colors = ["red", "yellow", "aqua", "fuchsia"],
-        root_color="lightgrey"))
+        root_color="#111111"))
 
-    fig1.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+    fig1.update_layout(margin=dict(l=0, r=0, t=0, b=0), template='plotly_dark')
 
-    dfcolmap = dff.copy()
-    dfcolmap= dfcolmap.astype({"mood": str})
-    dfcolmap["mood"].replace({"Happy": 1, "Sad": 2, "Energetic": 3, "Calm": 4}, inplace=True)
 
-    fig2 = px.parallel_coordinates(dfcolmap, color="mood", color_continuous_scale=[(0.00, "red"), (0.25, "red"),
-                                                                               (0.25, "yellow"), (0.50, "yellow"),
-                                                                               (0.50, "aqua"),  (0.75, "aqua"),
-                                                                               (0.75, "fuchsia"), (1.00, "fuchsia")])
+    #Ursprungsdatensatz kopieren
+    dflpd = dff.copy()
+
+    #Release Datum aufspalten in Jahr, Monat und Tag
+    dflpd[["year", "month", "day"]] = dflpd["release_date"].str.split("-", expand=True)
+    dflpd = dflpd.sort_values("year")
+
+    # #df mit Länge und Jahr
+    # dflpd = dflpd[['length', 'year']].copy()
+    # dflpd['length'] = dflpd['length']/60000
+    # dflpd = dflpd.rename(columns={"length": "av. length in min"})
+    #
+    # dfb2000 = dflpd[dflpd['year']<"2000"]
+    # dfa2000 = dflpd[dflpd['year']>="2000"]
+    #
+    # b2000 = pd.DataFrame(columns=["av len", "med year"])
+    # b2000["av len"] = dfb2000["av. length in min"].mean()
+    # b2000["med year"] = statistics.median(dfb2000["year"].unique())
+    #
+    # a2000 = pd.DataFrame(columns=["av len", "med year"])
+    # a2000["av len"] = dfa2000["av. length in min"].mean()
+    # a2000["med year"] = statistics.median(dfa2000["year"].unique())
+    #
+    # df2000 = pd.concat([b2000, a2000], axis=0)
+    #
+    # dflpd = dflpd.groupby(['year']).mean()
+    # dflpd = dflpd.reset_index(level=0)
+    #
+    # fig2 = go.Figure()
+    #
+    # fig2.add_trace(
+    #     go.Scatter(x=df2000["med year"], y=df2000["av len"], marker=dict(color="red"), name="Trendline"
+    #     ))
+    #
+    # fig2.add_trace(
+    #     go.Bar(x=dflpd["year"], y=dflpd["av. length in min"], marker=dict(color="#1DB954"), marker_line_width = 0, name="Length"
+    #     ))
+    #
+    # fig2.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'), type='category', categoryorder='category ascending', showgrid=False)
+    # fig2.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'), gridcolor='#303030')
+    # fig2.update_layout({'plot_bgcolor': 'rgba(0,0,0,250)', 'paper_bgcolor': 'rgba(0,0,0,250)'},
+    #               legend=dict(
+    #                 x=1,
+    #                 y=1,
+    #                 traceorder="reversed",
+    #                 font=dict(
+    #                 size=12,
+    #                 color="white"
+    #                     )))
+
+    dfff = dff.copy()
+    #dfff["release_date"] = dfff["release_date"].astype(str)
+    dfff[["year", "month", "day"]] = dfff["release_date"].str.split("-", expand=True)
+
+    dfMoodspYear = dfff.groupby(["year", "mood"]).count()
+
+    MpY = dfMoodspYear.iloc[:,0]
+    MpY = MpY.reset_index(level=(0,1))
+    MpY["year"] = MpY["year"].astype("int")
+    MpY = MpY.sort_values(by=["year"])
+
+    fig2 = px.bar(MpY, x="year", y="name", color="mood", template='plotly_dark', color_discrete_map={
+                "Happy": "red",
+                "Sad": "yellow",
+                "Energetic": "aqua",
+                "Calm": "fuchsia"})
+
+    fig2.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
+    fig2.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
 
 
 
