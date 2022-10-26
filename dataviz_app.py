@@ -58,14 +58,14 @@ app.layout = html.Div([
 
             #Selektionstools auf der zweiten Zeile (nur Datepicker)
             html.Div(children=[
-                html.H4("Hier folgt der Datepicker")
-                    # dcc.DatePickerRange(
-                    #     id='datepicker',
-                    #     min_date_allowed=date(1963, 1, 1),
-                    #     start_date=date(1963, 1, 1),
-                    #     max_date_allowed=(2021, 1, 1),
-                    #     end_date=(2021, 1, 1)
-                    #     ),
+                html.H4("Hier folgt der Datepicker"),
+                    dcc.DatePickerRange(
+                         id='datepicker',
+                         min_date_allowed= "1963-1-1",
+                         start_date="1963-1-1",
+                         max_date_allowed="2021-1-1",
+                         end_date="2021-1-1"
+                         ),
             ], className="selectionrow2"),
 
             #Zeile mit den Infos
@@ -108,14 +108,14 @@ app.layout = html.Div([
     [Output(component_id='treemap', component_property='figure'),
      Output(component_id='stacked-bar', component_property='figure'),
      ],
-    [Input(component_id='mood', component_property='value') #,
-     #Input(component_id='datepicker', component_property='start_date'),
-     #Input(component_id='datepicker', component_property='end_date') #,
+    [Input(component_id='mood', component_property='value') ,
+     Input(component_id='datepicker', component_property='start_date'),
+     Input(component_id='datepicker', component_property='end_date') #,
      #Input(component_id='attributes', component_property='value')
     ],
 )
 
-def update_moods(mood_slctd):  #, date_slctd1, date_slctd2
+def update_moods(mood_slctd, date_slctd1, date_slctd2):  #, date_slctd1, date_slctd2
 
     #Arbeitskopie der des Dataframe erstellen
     dff = df.copy()
@@ -125,8 +125,8 @@ def update_moods(mood_slctd):  #, date_slctd1, date_slctd2
 
 
     #Eingrenzen der Zeitserie anhand der beiden Werte aus dem Datepicker
-    #dff = dff[dff["release_date"] >= date_slctd1]
-    #dff = dff[dff["release_date"] <= date_slctd2]
+    dff = dff[dff["release_date"] >= date_slctd1]
+    dff = dff[dff["release_date"] <= date_slctd2]
 
 
 
