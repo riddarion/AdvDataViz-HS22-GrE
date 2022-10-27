@@ -221,7 +221,12 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2):  #, date_slctd1, date_sl
                     "Happy": "red",
                     "Sad": "yellow",
                     "Energetic": "aqua",
-                    "Calm": "fuchsia"})
+                    "Calm": "fuchsia"},
+                  labels={
+                     "year": "year",
+                     "name": "count of songs",
+                     "mood": "mood"
+                 })
 
     fig3.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
     fig3.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
