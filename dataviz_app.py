@@ -58,7 +58,6 @@ app.layout = html.Div([
 
             #Selektionstools auf der zweiten Zeile (nur Datepicker)
             html.Div(children=[
-                html.H4("Hier folgt der Datepicker"),
                     dcc.DatePickerRange(
                          id='datepicker',
                          min_date_allowed= "1963-1-1",
@@ -91,11 +90,19 @@ app.layout = html.Div([
             html.Div(children = [
                     dcc.Graph(id='stacked-bar', figure = {}, style = {'display': 'inline-block'}, responsive=True,
                               config={'displayModeBar': False}),
-            ], className="parallel-coordinates-row"),
+            ], className="stacked-bar-row"),
+
 
             #Zweite Zeile, Inhalt folgt später
             html.Div(children = [
             ], className="rest"),
+
+        ], className="graph-container"),
+        html.Div(children = [
+            html.Div(children = [
+                    dcc.Graph(id='length-bar', figure = {}, style = {'display': 'inline-block'}, responsive=True,
+                              config={'displayModeBar': False}),
+            ], className="length-bar-row"),
         ], className="graph-container"),
     ], className="container")
 ])
@@ -106,6 +113,7 @@ app.layout = html.Div([
 #Callback
 @app.callback(
     [Output(component_id='treemap', component_property='figure'),
+     Output(component_id='length-bar', component_property='figure'),
      Output(component_id='stacked-bar', component_property='figure'),
      ],
     [Input(component_id='mood', component_property='value') ,
@@ -147,27 +155,34 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2):  #, date_slctd1, date_sl
     dflpd[["year", "month", "day"]] = dflpd["release_date"].str.split("-", expand=True)
     dflpd = dflpd.sort_values("year")
 
-    # #df mit Länge und Jahr
-    # dflpd = dflpd[['length', 'year']].copy()
-    # dflpd['length'] = dflpd['length']/60000
-    # dflpd = dflpd.rename(columns={"length": "av. length in min"})
-    #
-    # dfb2000 = dflpd[dflpd['year']<"2000"]
-    # dfa2000 = dflpd[dflpd['year']>="2000"]
-    #
-    # b2000 = pd.DataFrame(columns=["av len", "med year"])
-    # b2000["av len"] = dfb2000["av. length in min"].mean()
-    # b2000["med year"] = statistics.median(dfb2000["year"].unique())
-    #
-    # a2000 = pd.DataFrame(columns=["av len", "med year"])
-    # a2000["av len"] = dfa2000["av. length in min"].mean()
-    # a2000["med year"] = statistics.median(dfa2000["year"].unique())
-    #
-    # df2000 = pd.concat([b2000, a2000], axis=0)
-    #
-    # dflpd = dflpd.groupby(['year']).mean()
-    # dflpd = dflpd.reset_index(level=0)
-    #
+    #df mit Länge und Jahr
+    dflpd = dflpd[['length', 'year']].copy()
+    dflpd['length'] = dflpd['length']/60000
+    dflpd = dflpd.rename(columns={"length": "av. length in min"})
+
+    dfb2000 = dflpd[dflpd['year']<"2000"]
+    dfa2000 = dflpd[dflpd['year']>="2000"]
+
+    b2000 = pd.DataFrame(columns=["av len", "med year"])
+    b2000["av len"] = dfb2000["av. length in min"].mean()
+    b2000["med year"] = statistics.median(dfb2000["year"].astype(int).unique())
+
+    a2000 = pd.DataFrame(columns=["av len", "med year"])
+    a2000["av len"] = dfa2000["av. length in min"].mean()
+    a2000["med year"] = statistics.median(dfa2000["year"].astype(int).unique())
+
+    df2000 = pd.concat([b2000, a2000], axis=0)
+
+    dflpd = dflpd.groupby(['year']).mean()
+    dflpd = dflpd.reset_index(level=0)
+
+    fig2 = px.bar(dflpd, x="year", y="av. length in min",  template='plotly_dark', title = "Average Song Length per Year", color_discrete_sequence=["#1DB954"])
+
+    fig2.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
+    fig2.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
+    fig2.update_layout(title_font_color="#1DB954")
+
+
     # fig2 = go.Figure()
     #
     # fig2.add_trace(
@@ -180,7 +195,7 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2):  #, date_slctd1, date_sl
     #
     # fig2.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'), type='category', categoryorder='category ascending', showgrid=False)
     # fig2.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'), gridcolor='#303030')
-    # fig2.update_layout({'plot_bgcolor': 'rgba(0,0,0,250)', 'paper_bgcolor': 'rgba(0,0,0,250)'},
+    # fig2.update_layout({'plot_bgcolor': 'rgba(0,0,0,200)', 'paper_bgcolor': 'rgba(0,0,0,200)'},
     #               legend=dict(
     #                 x=1,
     #                 y=1,
@@ -201,18 +216,20 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2):  #, date_slctd1, date_sl
     MpY["year"] = MpY["year"].astype("int")
     MpY = MpY.sort_values(by=["year"])
 
-    fig2 = px.bar(MpY, x="year", y="name", color="mood", template='plotly_dark', color_discrete_map={
-                "Happy": "red",
-                "Sad": "yellow",
-                "Energetic": "aqua",
-                "Calm": "fuchsia"})
+    fig3 = px.bar(MpY, x="year", y="name", color="mood", template='plotly_dark', title = "Number of Songs per Mood and Year",
+                  color_discrete_map={
+                    "Happy": "red",
+                    "Sad": "yellow",
+                    "Energetic": "aqua",
+                    "Calm": "fuchsia"})
 
-    fig2.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
-    fig2.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
+    fig3.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
+    fig3.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
+    fig3.update_layout(title_font_color="#1DB954")
 
 
 
-    return fig1, fig2
+    return fig1, fig2, fig3
 
 
 
