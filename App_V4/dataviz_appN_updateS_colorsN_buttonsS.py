@@ -1,13 +1,16 @@
 import pandas as pd
 import plotly.express as px
+import webbrowser
 import numpy as np
 import statistics
+import json
 
 import dash
 from dash import ctx
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html
+from dash import dcc
 from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
 #import dash_bootstrap_components as dbc
 
 import plotly.graph_objects as go
@@ -15,6 +18,7 @@ from plotly.subplots import make_subplots
 from datetime import date
 
 df = pd.read_csv("data_moods.csv")
+df['url'] = "https://open.spotify.com/track/" + df['id']
 
 
 ###Layout###
@@ -126,8 +130,19 @@ def render_content(tab):
 
 
                 html.Div(children = [
+                    dcc.Dropdown(
+                        options= ['popularity', 'danceability', 'speechiness', 'acousticness', 'energy', 'instrumentalness', 'liveness', 'valence', 'loudness', 'tempo']
+                        , id='scatter-dropdown-1',
+                        multi = False,
+                        value = 'popularity'),
+                    dcc.Dropdown(
+                        options= ['popularity', 'danceability', 'speechiness', 'acousticness', 'energy', 'instrumentalness', 'liveness', 'valence', 'loudness', 'tempo']
+                        , id='scatter-dropdown-2',
+                        multi = False,
+                        value = 'danceability'),
                     dcc.Graph(id='scatter', figure = {}, responsive=True,
                             config={'displayModeBar': False}),
+                    html.Pre(id='data')
                 ]  , className="scatter-row"),
 
                 #Erste Zeile mit Stacked Bar Chart
@@ -155,7 +170,7 @@ def render_content(tab):
 
 
                 #Linke Spalte
-                html.h2("Selection"),
+                html.H2("Selection"),
 
                 #Selektionstools auf der ersten Zeile (nebeneinander abbgebildet)
                 html.Div(children=[
@@ -188,8 +203,8 @@ def render_content(tab):
 
                 #Zeile mit den Infos
                 html.Div(children=[
-                        html.h2("Data Info"),
-                        html.p.wh("686 Songs - 54X Artists")
+                        html.H2("Data Info"),
+                        html.P("686 Songs - 54X Artists")
                 ], className="info-row"),
 
                 #Zeile mit der Treemap
@@ -214,6 +229,16 @@ def render_content(tab):
                 html.Br(),
 
                 html.Div(children = [
+                    dcc.Dropdown(
+                        options= ['popularity', 'danceability', 'speechiness', 'acousticness', 'energy', 'instrumentalness', 'liveness', 'valence', 'loudness', 'tempo']
+                        , id='scatter-dropdown-1w',
+                        multi = False,
+                        value = 'popularity'),
+                    dcc.Dropdown(
+                        options= ['popularity', 'danceability', 'speechiness', 'acousticness', 'energy', 'instrumentalness', 'liveness', 'valence', 'loudness', 'tempo']
+                        , id='scatter-dropdown-2w',
+                        multi = False,
+                        value = 'danceability'),
                     dcc.Graph(id='scatter-w', figure = {}, responsive=True,
                             config={'displayModeBar': False}),
                 ]  , className="scatter-row"),
@@ -240,12 +265,28 @@ def render_content(tab):
 ###Befüllen des Dash Gerüsts mit den Visualisierungen###
 
 
+
+
+# @app.callback(
+#      Output('click-data', 'children'),
+#      Input('scatter', 'clickData')
+# )
+#
+# def open_url(clickData):
+#     if clickData:
+#         webbrowser.open_new_tab(clickData['points'][0]['customdata'][0])
+#     else:
+#         raise PreventUpdate
+#     # return json.dumps(clickData, indent=2)
+
+
 #Callback Tab1
 @app.callback(
     [Output(component_id='treemap', component_property='figure'),
      Output(component_id='parallel-coord', component_property='figure'),
      Output(component_id='scatter', component_property='figure'),
      Output(component_id='switch', component_property='figure'),
+     Output('data', 'clickData')
      #Output(component_id='stacked-bar', component_property='figure'),
      #Output('switch-visual', 'sfig'),
      ],
@@ -253,12 +294,25 @@ def render_content(tab):
      Input(component_id='datepicker', component_property='start_date'),
      Input(component_id='datepicker', component_property='end_date'),
      Input('view-stacked', 'n_clicks'),
-     Input('view-length', 'n_clicks'),#,
+     Input('view-length', 'n_clicks'),
+     Input(component_id='scatter-dropdown-1', component_property='value'),
+     Input(component_id='scatter-dropdown-2', component_property='value'),
+     Input('scatter', 'clickData')
      #Input(component_id='attributes', component_property='value')
     ],
 )
 
-def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slctd1, date_slctd2
+
+
+
+
+def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1, scatterdrop2, clickData):  #, date_slctd1, date_slctd2
+
+    if clickData:
+        webbrowser.open_new_tab(clickData['points'][0]['customdata'][0])
+    # else:
+    #     raise PreventUpdate
+    #     # return json.dumps(clickData, indent=2)
 
     #Arbeitskopie der des Dataframe erstellen
     dff = df.copy()
@@ -266,6 +320,10 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
 
     dff = dff[dff["mood"].isin(mood_slctd)]
 
+    # if len(songselected) == 0:
+    #     dff = dff
+    # else:
+    #     dff = dff[dff["name"] == songselected]
 
     #Eingrenzen der Zeitserie anhand der beiden Werte aus dem Datepicker
     dff = dff[dff["release_date"] >= date_slctd1]
@@ -378,18 +436,18 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
     dflpd['length'] = dflpd['length']/60000
     dflpd = dflpd.rename(columns={"length": "av. length in min"})
 
-    dfb2000 = dflpd[dflpd['year']<"2000"]
-    dfa2000 = dflpd[dflpd['year']>="2000"]
-
-    b2000 = pd.DataFrame(columns=["av len", "med year"])
-    b2000["av len"] = dfb2000["av. length in min"].mean()
-    b2000["med year"] = statistics.median(dfb2000["year"].astype(int).unique())
-
-    a2000 = pd.DataFrame(columns=["av len", "med year"])
-    a2000["av len"] = dfa2000["av. length in min"].mean()
-    a2000["med year"] = statistics.median(dfa2000["year"].astype(int).unique())
-
-    df2000 = pd.concat([b2000, a2000], axis=0)
+    # dfb2000 = dflpd[dflpd['year']<"2000"]
+    # dfa2000 = dflpd[dflpd['year']>="2000"]
+    #
+    # b2000 = pd.DataFrame(columns=["av len", "med year"])
+    # b2000["av len"] = dfb2000["av. length in min"].mean()
+    # b2000["med year"] = statistics.median(dfb2000["year"].astype(int).unique())
+    #
+    # a2000 = pd.DataFrame(columns=["av len", "med year"])
+    # a2000["av len"] = dfa2000["av. length in min"].mean()
+    # a2000["med year"] = statistics.median(dfa2000["year"].astype(int).unique())
+    #
+    # df2000 = pd.concat([b2000, a2000], axis=0)
 
     dflpd = dflpd.groupby(['year']).mean()
     dflpd = dflpd.reset_index(level=0)
@@ -479,13 +537,17 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
 
     mcolors = {"Happy": "goldenrod", "Sad": "rebeccapurple", "Energetic": "maroon", "Calm": "teal"}
 
-    fig5 = px.scatter(dff, x="danceability", y="popularity", color="mood", color_discrete_map=mcolors, template='plotly_dark')
+
+    fig5 = px.scatter(dff, x=scatterdrop1 , y=scatterdrop2, color="mood", color_discrete_map=mcolors, template='plotly_dark',
+                      hover_name="name", hover_data=[dff["artist"], scatterdrop1, scatterdrop2], custom_data=["url"])
+
+                      #hover_name=dff[dff["name"] == songselected]['Value'], hover_data=[scatterdrop1, scatterdrop2]
 
     fig5.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
     fig5.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
-    fig5.update_layout(title_font_color="#1DB954", showlegend=False)
+    fig5.update_layout(title_font_color="#1DB954", showlegend=False, clickmode='event+select')
 
-    return fig1, fig2, fig5, fig3
+    return fig1, fig2, fig5, fig3, clickData
 
 #Callback Tab2
 @app.callback(
@@ -499,13 +561,15 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
      Input(component_id='datepicker', component_property='start_date'),
      Input(component_id='datepicker', component_property='end_date'),
      Input('view-stacked-w', 'n_clicks'),
-     Input('view-length-w', 'n_clicks')#,
+     Input('view-length-w', 'n_clicks'),
+     Input(component_id='scatter-dropdown-1w', component_property='value'),
+     Input(component_id='scatter-dropdown-2w', component_property='value')#,
      #Input(component_id='attributes', component_property='value')
     ],
 
 )
 
-def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slctd1, date_slctd2
+def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1, scatterdrop2):  #, date_slctd1, date_slctd2
 
     #Arbeitskopie der des Dataframe erstellen
     dff = df.copy()
@@ -624,20 +688,20 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
     dflpd = dflpd[['length', 'year']].copy()
     dflpd['length'] = dflpd['length']/60000
     dflpd = dflpd.rename(columns={"length": "av. length in min"})
-
-    dfb2000 = dflpd[dflpd['year']<"2000"]
-    dfa2000 = dflpd[dflpd['year']>="2000"]
-
-    b2000 = pd.DataFrame(columns=["av len", "med year"])
-    b2000["av len"] = dfb2000["av. length in min"].mean()
-    b2000["med year"] = statistics.median(dfb2000["year"].astype(int).unique())
-
-    a2000 = pd.DataFrame(columns=["av len", "med year"])
-    a2000["av len"] = dfa2000["av. length in min"].mean()
-    a2000["med year"] = statistics.median(dfa2000["year"].astype(int).unique())
-
-    df2000 = pd.concat([b2000, a2000], axis=0)
-
+    #
+    # dfb2000 = dflpd[dflpd['year']<"2000"]
+    # dfa2000 = dflpd[dflpd['year']>="2000"]
+    #
+    # b2000 = pd.DataFrame(columns=["av len", "med year"])
+    # b2000["av len"] = dfb2000["av. length in min"].mean()
+    # b2000["med year"] = statistics.median(dfb2000["year"].astype(int).unique())
+    #
+    # a2000 = pd.DataFrame(columns=["av len", "med year"])
+    # a2000["av len"] = dfa2000["av. length in min"].mean()
+    # a2000["med year"] = statistics.median(dfa2000["year"].astype(int).unique())
+    #
+    # df2000 = pd.concat([b2000, a2000], axis=0)
+    #
     dflpd = dflpd.groupby(['year']).mean()
     dflpd = dflpd.reset_index(level=0)
 
@@ -678,7 +742,7 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
     MpY = MpY.sort_values(by=["year"])
 
 
-    if "view-length" == ctx.triggered_id:
+    if "view-length-w" == ctx.triggered_id:
 
         fig3 = px.bar(dflpd, x="year", y="av. length in min",  template='plotly_white', title = "Average Song Length per Year", color_discrete_sequence=["#111111"])
 
@@ -687,7 +751,7 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
         fig3.update_layout(title_font_color="#1DB954")
 
 
-    elif "view-stacked" == ctx.triggered_id:
+    elif "view-stacked-w" == ctx.triggered_id:
 
         fig3 = px.bar(MpY, x="year", y="name", color="mood", template='plotly_white', title = "Number of Songs per Mood and Year",
                   color_discrete_map={
@@ -715,7 +779,8 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
 
     mcolors = {"Happy": "goldenrod", "Sad": "rebeccapurple", "Energetic": "maroon", "Calm": "teal"}
 
-    fig5 = px.scatter(dff, x="danceability", y="popularity", color="mood", color_discrete_map=mcolors, template='plotly_white')
+    fig5 = px.scatter(dff, x=scatterdrop1, y=scatterdrop2, color="mood", color_discrete_map=mcolors, template='plotly_white',
+                      hover_name="name", hover_data=[dff["artist"], scatterdrop1, scatterdrop2])
 
     fig5.update_xaxes(title_font=dict(color="#111111"), tickfont=dict(color="#111111"))
     fig5.update_yaxes(title_font=dict(color="#111111"), tickfont=dict(color="#111111"))
@@ -724,4 +789,4 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2):  #, date_slc
     return fig1, fig2, fig5, fig3
 
 if __name__ == '__main__':
-    app.run_server(debug=False, port=8051)
+    app.run_server(debug=True, port=8051)
