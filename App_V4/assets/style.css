@@ -176,6 +176,18 @@ p.white {
     display: inline-block;
 }
 
+.switch-visual-w {
+    width: 100%;
+    padding-bottom: 0.5rem;
+}
+
+#switch-w {
+    width: 100% ;
+    height: 48vh ;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
 .length-bar-row {
  width: 100%;
  padding-bottom: 0.5rem;
@@ -239,21 +251,22 @@ p.white {
 
 
 
-#stacked-view {
+#view-stacked {
     background-color: #1DB954;
     border: 2px solid #1A1A1A;
     color: #FFFFFF;
     cursor: pointer;
     display: inline-block;
-    font-size: 16px;
-    font-weight: 600;
+    font-family: Barlow;
+    font-size: 1rem;
+    font-weight: 500;
     text-align: center;
     text-decoration: none
     transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-    width: 100%;
+    width: 50%;
     will-change: transform;
 
 
@@ -273,7 +286,110 @@ p.white {
   transform: translateY(0);
 }
 
+#view-stacked-w {
+    background-color: #1DB954;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Barlow;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: 50%;
+    will-change: transform;
 
+
+}
+
+#view-stacked-w:disabled {
+  pointer-events: none;
+}
+
+#view-stacked-w:hover {
+  background-color: #1DB954;
+  /*transform: translateY(-2px); */
+}
+
+#view-stacked-w:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+#view-length {
+    background-color: #1DB954;
+    border: 2px solid #1A1A1A;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Barlow;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: 50%;
+    will-change: transform;
+
+
+}
+
+#view-length:disabled {
+  pointer-events: none;
+}
+
+#view-length:hover {
+  background-color: #1DB954;
+  /*transform: translateY(-2px); */
+}
+
+#view-length:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+#view-length-w {
+    background-color: #1DB954;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Barlow;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: 50%;
+    will-change: transform;
+
+
+}
+
+#view-length-w:disabled {
+  pointer-events: none;
+}
+
+#view-length-w:hover {
+  background-color: #1DB954;
+  /*transform: translateY(-2px); */
+}
+
+#view-length-w:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
 
 #treemap {
     height: 45vh;
