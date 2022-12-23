@@ -285,8 +285,7 @@ def render_content(tab):
     [Output(component_id='treemap', component_property='figure'),
      Output(component_id='parallel-coord', component_property='figure'),
      Output(component_id='scatter', component_property='figure'),
-     Output(component_id='switch', component_property='figure'),
-     Output('data', 'clickData')
+     Output(component_id='switch', component_property='figure')
      #Output(component_id='stacked-bar', component_property='figure'),
      #Output('switch-visual', 'sfig'),
      ],
@@ -297,7 +296,7 @@ def render_content(tab):
      Input('view-length', 'n_clicks'),
      Input(component_id='scatter-dropdown-1', component_property='value'),
      Input(component_id='scatter-dropdown-2', component_property='value'),
-     Input('scatter', 'clickData')
+
      #Input(component_id='attributes', component_property='value')
     ],
 )
@@ -305,14 +304,18 @@ def render_content(tab):
 
 
 
+def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1, scatterdrop2):  #, date_slctd1, date_slctd2
 
-def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1, scatterdrop2, clickData):  #, date_slctd1, date_slctd2
-
-    if clickData:
-        webbrowser.open_new_tab(clickData['points'][0]['customdata'][0])
+    # if clickData:
+    #     with open('clickInfo.txt', 'w') as f:
+    #         f.write('dict = ' + str(clickData) + '\n')
+    #     webbrowser.open_new_tab(clickData['points'][0]['customdata'][0])
+    #     clickData['customdata'][0] = ''
     # else:
     #     raise PreventUpdate
     #     # return json.dumps(clickData, indent=2)
+
+
 
     #Arbeitskopie der des Dataframe erstellen
     dff = df.copy()
@@ -547,7 +550,20 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1,
     fig5.update_yaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
     fig5.update_layout(title_font_color="#1DB954", showlegend=False, clickmode='event+select')
 
-    return fig1, fig2, fig5, fig3, clickData
+    return fig1, fig2, fig5, fig3
+
+
+@app.callback(
+    Output('data', 'clickData'),
+    Input('scatter', 'clickData'))
+
+def open_url(clickData):
+    if clickData:
+        webbrowser.open_new_tab(clickData['points'][0]['customdata'][0])
+    else:
+        raise PreventUpdate
+    # return json.dumps(clickData, indent=2)
+
 
 #Callback Tab2
 @app.callback(
