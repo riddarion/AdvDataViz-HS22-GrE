@@ -451,7 +451,7 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1,
     mcolors = {"Happy": "goldenrod", "Sad": "rebeccapurple", "Energetic": "maroon", "Calm": "teal"}
 
 
-    fig5 = px.scatter(dff, x=scatterdrop1 , y=scatterdrop2, color="mood", color_discrete_map=mcolors, title = "Correlation of Attributes (Click on data point to open Song in Spotify)", template='plotly_dark',
+    fig5 = px.scatter(dff, x=scatterdrop1 , y=scatterdrop2, color="mood", color_discrete_map=mcolors, title = "Correlation of Attributes <br><sup>(Click on data point to open Song in Spotify)</sup>", template='plotly_dark',
                       hover_name="name", hover_data=[dff["artist"], scatterdrop1, scatterdrop2], custom_data=["url"])
 
     fig5.update_xaxes(title_font=dict(color='#1DB954'), tickfont=dict(color='#1DB954'))
@@ -671,7 +671,7 @@ def update_moods(mood_slctd, date_slctd1, date_slctd2, btn1, btn2, scatterdrop1,
 
     mcolors = {"Happy": "goldenrod", "Sad": "rebeccapurple", "Energetic": "maroon", "Calm": "teal"}
 
-    fig5 = px.scatter(dff, x=scatterdrop1, y=scatterdrop2, color="mood", color_discrete_map=mcolors, title = "Correlation of Attributes (Click on data point to open Song in Spotify)", template='plotly_white',
+    fig5 = px.scatter(dff, x=scatterdrop1, y=scatterdrop2, color="mood", color_discrete_map=mcolors, title = "Correlation of Attributes <br><sup>(Click on data point to open Song in Spotify)</sup>", template='plotly_white',
                       hover_name="name", hover_data=[dff["artist"], scatterdrop1, scatterdrop2], custom_data=["url"])
 
     fig5.update_xaxes(title_font=dict(color="#111111"), tickfont=dict(color="#111111"))
