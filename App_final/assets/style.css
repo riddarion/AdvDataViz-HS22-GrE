@@ -34,6 +34,10 @@ a:link {
   text-decoration: none;
 }
 
+sup {
+    font-size: 0.9em;
+}
+
 
 /*Tabs*/
 
@@ -497,7 +501,10 @@ a:link {
     margin: 0rem !Important;
 }
 
-
+.dropdown {
+    color: #000000;
+    background-color: transparent;
+}
 
 .
 element.style {
